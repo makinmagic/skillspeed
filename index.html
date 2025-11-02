@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>XSO Skill Time Calculator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css" rel="stylesheet">
+
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #0d0221;
+    color: #f0f0f0;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    z-index: 0;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .main-content {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    color: #C169FF;
+    font-size: 40px;
+    text-shadow: 0 0 32px rgba(146, 21, 230, 0.8), 0 0 30px rgba(193, 105, 255, 0.8);
+    margin-bottom: 20px;
+  }
+
+  .instructions {
+    background: #1c003b;
+    border: 1px solid #9215e6;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 30px 0;
+    font-size: 16px;
+    color: #fff;
+  }
+
+  label {
+    display: block;
+    margin: 10px 0;
+    font-size: 1rem;
+  }
+
+  input {
+    padding: 8px;
+    width: 120px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #9215e6;
+    background-color: #1c003b;
+    color: #fff;
+    text-align: center;
+  }
+
+  button {
+    font-size: 1.1rem;
+    padding: 10px 30px;
+    background-color: #C169FF;
+    color: #0d0221;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+  }
+
+  button:hover {
+    background-color: #d288ff;
+  }
+
+  #result {
+    margin-top: 25px;
+    font-size: 1.3rem;
+    color: #eeba30;
+  }
+
+  #page-links {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+
+  #page-links a {
+    color: #c169ff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  #page-links a:hover {
+    text-decoration: underline;
+  }
+
+  #footer-note {
+    text-align: center;
+    font-size: 16px;
+    color: #ccc;
+    padding: 20px;
+  }
+
+  /* Stars background - used with permission from Sorta! */
+  .stars {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.8;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="main-content">
+    <h1>🧮 XenoSO Skill Time Calculator</h1>
+    <p class="instructions">
+      Enter your <strong>current skill</strong>, <strong>target skill</strong>, and <strong>speed %</strong> to estimate how long it will take to reach your goal.
+    </p>
+
+    <label>Current Skill: <input type="number" id="current" step="0.01" value="19.65"></label>
+    <label>Target Skill: <input type="number" id="target" step="0.01" value="20.00"></label>
+    <label>Speed (%): <input type="number" id="speed" step="1" value="126"></label>
+    <button onclick="calculate()">Calculate</button>
+
+    <h3 id="result"></h3>
+    <div class="stars" id="stars"></div>
+  </div>
+
+  <div id="page-links">
+    <a href="https://xenoso.space/" target="_blank">🌐 Main Website</a> |
+    <a href="https://makinmagic.github.io/XenoSO/" target="_blank">🔎 Dashboard/Finder</a> |
+    <a href="https://xenoso.fandom.com/" target="_blank">ℹ️ Wiki</a> |
+    <a href="https://makinmagic.github.io/XenoSOtimer/" target="_blank">⏳ XenoSO Timer</a> |
+    <a href="https://makinmagic.github.io/timer/" target="_blank">⏲️ SMO Timer</a> |
+    <a href="https://makinmagic.github.io/pizza/" target="_blank">🍕 Pizza Helper</a>
+  </div>
+
+  <div id="footer-note">Made with an 🧮 for XenoSO by Mr Teddy</div>
+
+<script>
+  const times126 = [
+    253, 506, 759, 1011, 1264, 1517, 1770, 2023, 2276, 2529,
+    4398, 3700, 4205, 4710, 5215, 5720, 6225, 6720, 7226, 7731, 8236
+  ];
+
+  function segmentTime126(level) { return times126[level] ?? 0; }
+
+  function formatHMS(totalSeconds) {
+    totalSeconds = Math.round(totalSeconds);
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return (h > 0 ? `${h}h ` : "") + `${m}m ${s}s`;
+  }
+
+  function calcTimeSeconds(current, target, speedPercent) {
+    if (!(isFinite(current) && isFinite(target) && isFinite(speedPercent))) return NaN;
+    if (speedPercent <= 0 || target <= current) return NaN;
+
+    const startL = Math.floor(current);
+    const endL = Math.floor(target);
+    const fracStart = current - startL;
+    const fracEnd = target - endL;
+    if (startL < 0 || endL > 20) return NaN;
+
+    let seconds126 = 0;
+    if (startL === endL) {
+      seconds126 += (target - current) * segmentTime126(startL);
+    } else {
+      seconds126 += (1 - fracStart) * segmentTime126(startL);
+      for (let L = startL + 1; L <= endL - 1; L++) seconds126 += segmentTime126(L);
+      if (fracEnd > 0) seconds126 += fracEnd * segmentTime126(endL);
+    }
+
+    return seconds126 * (126 / speedPercent);
+  }
+
+  function calculate() {
+    const current = parseFloat(document.getElementById("current").value);
+    const target = parseFloat(document.getElementById("target").value);
+    const speed = parseFloat(document.getElementById("speed").value);
+    const secs = calcTimeSeconds(current, target, speed);
+    const out = document.getElementById("result");
+
+    if (!isFinite(secs)) {
+      out.textContent = "Please enter valid numbers (target > current, speed > 0, max 20.99).";
+      return;
+    }
+    out.textContent = "Estimated Time: " + formatHMS(secs);
+  }
+
+  function generateStars() {
+    const starsContainer = document.getElementById("stars");
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement("div");
+      star.classList.add("star");
+      const size = Math.random() * 2 + 1 + "px";
+      star.style.width = size;
+      star.style.height = size;
+      star.style.top = Math.random() * 100 + "%";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.animation = `twinkle ${Math.random() * 5 + 5}s infinite`;
+      starsContainer.appendChild(star);
+    }
+  }
+  window.onload = generateStars;
+</script>
+</body>
+</html>
